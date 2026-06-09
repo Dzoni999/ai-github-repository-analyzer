@@ -98,7 +98,7 @@ Example:
 
 
 ```md
-![Workflow](workflow_ss.png)
+![Workflow](./workflow_ss.png)
 ```
 
 ## License
