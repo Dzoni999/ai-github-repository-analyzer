@@ -96,10 +96,7 @@ Example:
 
 ## Screenshot
 
-
-```md
-![Workflow](./workflow_ss.png)
-```
+<img src="workflow_ss.png" alt="Workflow" width="1000">
 
 ## License
 
