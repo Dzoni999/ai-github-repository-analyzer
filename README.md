@@ -96,10 +96,9 @@ Example:
 
 ## Screenshot
 
-Place a workflow screenshot inside the `screenshots` folder and reference it below:
 
 ```md
-![Workflow](screenshots/workflow_ss.png)
+![Workflow](workflow_ss.png)
 ```
 
 ## License
