@@ -1,0 +1,336 @@
+{
+  "name": "AI GitHub Repository Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen/qwen3-8b",
+          "mode": "list",
+          "cachedResultName": "qwen/qwen3-8b"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1104,
+        208
+      ],
+      "id": "93a8d84a-a8f4-45f0-821e-de44afffca87",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "deR5qRa5IZXE8M6K",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://raw.githubusercontent.com/' + $('Webhook').first().json.body.repo + '/' + $('Get Repository Metadata').first().json.default_branch + '/README.md' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        272,
+        0
+      ],
+      "id": "546350a3-dd67-47d4-ab47-9611dd91e415",
+      "name": "Get README"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "==README:\n\n{{ $('Code in JavaScript').first().json.readme }}\n\nList all features mentioned in the README.\nReturn only a bullet list.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "6c890f1b-2ed1-4afc-a5b7-9b04cda43b3c",
+      "name": "AI Features"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "==README:\n\n{{ $('Code in JavaScript').first().json.readme }}\n\nBased on the README above, identify and list all programming languages, frameworks, databases, and major libraries used in this project.\nReturn the result as a clean, concise bullet point list.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        736,
+        0
+      ],
+      "id": "c28fd576-3e66-49cb-bb7f-1cd556724282",
+      "name": "AI Technologies"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "==README:\n\n{{ $('Code in JavaScript').first().json.readme }}\n\nSummarize the project in 2 sentences.\n\nAnswer in Serbian Latinica.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1440,
+        0
+      ],
+      "id": "37cc93bc-6462-4e87-8504-488e7b4b312b",
+      "name": "AI Summary"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen/qwen3-8b",
+          "mode": "list",
+          "cachedResultName": "qwen/qwen3-8b"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1440,
+        208
+      ],
+      "id": "fb2f1543-c153-4c1f-820f-51b2dd92dceb",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "deR5qRa5IZXE8M6K",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen/qwen3-8b",
+          "mode": "list",
+          "cachedResultName": "qwen/qwen3-8b"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        736,
+        208
+      ],
+      "id": "3935a152-3c69-4d81-b093-3adca941be59",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "deR5qRa5IZXE8M6K",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.github.com/repos/' + $json.body.repo }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        48,
+        0
+      ],
+      "id": "cab1779e-696b-4723-a4a2-2dbbfff52d41",
+      "name": "Get Repository Metadata"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const rawReadme = $json.data || $json.body || ''; \nreturn {\n  readme: typeof rawReadme === 'string' ? rawReadme.substring(0, 2000) : JSON.stringify(rawReadme).substring(0, 2000)\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "id": "6cc0a6ee-5f25-40e5-8e50-df8c4aeeb66e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "analyze-repo",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "e9b9100e-4bca-4408-8480-04e9c68f0034",
+      "name": "Webhook",
+      "webhookId": "8101c5c1-313c-47c5-82d5-fa8c72b354db"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Izvlačimo tekstualne odgovore iz svakog agenta\nconst techOutput = $('AI Technologies').first().json.text || $('AI Technologies').first().json.output || \"\";\nconst featuresOutput = $('AI Features').first().json.text || $('AI Features').first().json.output || \"\";\nconst summaryOutput = $('AI Summary').first().json.text || $('AI Summary').first().json.output || \"\";\nconst repoName = $('Webhook').first().json.body.repo || \"Unknown Repo\";\n\nreturn [\n  {\n    json: {\n      repository: repoName,\n      analysis: {\n        technologies: techOutput,\n        features: featuresOutput,\n        summary: summaryOutput\n      },\n      status: \"success\",\n      generated_at: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1744,
+        0
+      ],
+      "id": "d8efd829-aca2-41ac-9b41-4ff32bfcc355",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Features",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get README": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Technologies": {
+      "main": [
+        [
+          {
+            "node": "AI Features",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Summary": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Summary",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Technologies",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Repository Metadata": {
+      "main": [
+        [
+          {
+            "node": "Get README",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Technologies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Repository Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        []
+      ]
+    },
+    "AI Features": {
+      "main": [
+        [
+          {
+            "node": "AI Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "bd8d5a90-2c66-46bf-a14d-db5520bb4365",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ad53659a185e2e2335e56beb9ccf566f2ffd472d78a8eaf71a66ebfc5ec528b3"
+  },
+  "id": "ZGGRVDo1vLVruSxt",
+  "tags": []
+}
